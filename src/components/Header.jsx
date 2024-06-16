@@ -1,11 +1,14 @@
-import { Button, Navbar, TextInput } from 'flowbite-react';
+import { Avatar, Button, Dropdown, Navbar, TextInput } from 'flowbite-react';
 import { Link, useLocation } from 'react-router-dom';
 import { AiOutlineSearch } from 'react-icons/ai'
 import { FaMoon } from 'react-icons/fa';
+import { useSelector } from 'react-redux';
 
 export default function Header() {
 
   const path = useLocation().pathname;
+  const { currentUser } = useSelector(state => state.user);
+
 
   return (
     <Navbar className='border-b-2 p-4'>
@@ -26,6 +29,7 @@ export default function Header() {
         ></TextInput>
       </form>
 
+
       <Button className='lg:hidden bg-gray-300' >
         <AiOutlineSearch className='text-lg text-black font-bold' />
       </Button>
@@ -34,9 +38,36 @@ export default function Header() {
       <div className='flex gap-3 md:order-2 items-center'>
         <FaMoon className='w-12 h-4 cursor-pointer hidden md:inline' />
 
-        <Link to="/sign-in" >
-          <Button gradientDuoTone='purpleToBlue'>Sign-in</Button>
-        </Link>
+        {currentUser ?
+          (
+            <Dropdown inline arrowIcon={false}
+              label={
+                <Avatar alt='omk' img={currentUser.profilePicture} rounded />
+              }>
+              <Dropdown.Header>
+                <span className='text-sm block mb-2'>{currentUser.username}</span>
+                <span className='text-sm block truncate'>{currentUser.email}</span>
+
+              </Dropdown.Header>
+              <Link to='/dashboard?tab=profile'>
+                <Dropdown.Item>
+                  Profile
+                </Dropdown.Item>
+              </Link>
+
+              <Dropdown.Item>
+                  Sign out
+                </Dropdown.Item>
+
+
+            </Dropdown>
+          ) :
+          <Link to="/sign-in" >
+            <Button gradientDuoTone='purpleToBlue'>Sign-in</Button>
+          </Link>
+        }
+
+
         <Navbar.Toggle />
 
       </div>
