@@ -22,12 +22,14 @@ export default function Dashboard() {
         {/* Sidebar */}
         <DashSidebar />
       </div>
-      <div className='p-5 '>
-        {/* DashBar */}
-        {tab == 'profile' &&
+
+       <div className='w-full '>
+         {/* DashBar */}
+         {tab == 'profile' &&
           <DashProfile />
         }
-      </div>
+       </div>
+      
 
     </div>
   )
