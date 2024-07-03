@@ -1,34 +1,43 @@
-import { Alert, Button, TextInput } from 'flowbite-react';
+import { Alert, Button, Modal, TextInput } from 'flowbite-react';
 import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { FaTriangleExclamation } from "react-icons/fa6";
+
 import {
   getDownloadURL,
   getStorage,
   ref,
   uploadBytesResumable,
 } from 'firebase/storage';
-import  {app}  from '../../firebase.js';
+import { app } from '../../firebase.js';
 
-import { updateStart,updateFailure,updateSuccess } from '../redux/user/userSlice.js';
+import {
+  updateStart, updateFailure, updateSuccess,
+  deleteUserFailure, deleteUserStart, deleteUserSuccess
+} from '../redux/user/userSlice.js';
 import { useDispatch } from 'react-redux';
 
 export default function DashProfile() {
 
-  const { currentUser } = useSelector((state) => state.user);
+  const { currentUser, error } = useSelector((state) => state.user);
 
   const [imagFile, setImageFile] = useState(null);
   const [imageFileURL, setImageFileURL] = useState(null);
-  
-   const [updateUserSuccess, setUpdateUserSuccess] = useState(null);
-  const [updateUserError, setUpdateUserError] = useState(null);
-  const filePickRef = useRef();
-  const dispatch=useDispatch();
 
-  const [imageFileUploadProgress,setImageFileUploadProgress]=useState(null);
-  const [imageFileUploadError,setImageFileUploadError]=useState(null);
+  const [updateUserSuccess, setUpdateUserSuccess] = useState(null);
+  const [updateUserError, setUpdateUserError] = useState(null);
+
+  const filePickRef = useRef();
+  const dispatch = useDispatch();
+
+  const [imageFileUploadProgress, setImageFileUploadProgress] = useState(null);
+  const [imageFileUploadError, setImageFileUploadError] = useState(null);
+
+  //delete
+  const [showModal, setShowModal] = useState(false);
 
   //for update profile
-  const [formData,setFormData]=useState({});
+  const [formData, setFormData] = useState({});
 
   console.log(imageFileUploadProgress);
 
@@ -41,17 +50,17 @@ export default function DashProfile() {
 
   }
 
-  const handleChange=(e)=>{
-    setFormData({...formData, [e.target.id]:e.target.value})
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value })
   }
 
   console.log(formData);
 
-  function formValidation(){
-    
+  function formValidation() {
+
   }
   const handleSubmit = async (e) => {
-    
+
     e.preventDefault();
     setUpdateUserError(null);
     setUpdateUserSuccess(null);
@@ -85,81 +94,151 @@ export default function DashProfile() {
     }
   };
 
-  useEffect(()=> {
+  useEffect(() => {
 
-    const uploadImage=async()=>{
-      
-      const storage=getStorage(app);
+    const uploadImage = async () => {
+
+      const storage = getStorage(app);
       //if same file chosed twice==error,
       //hence made fileName unique with date
-      const fileName=new Date().getTime()+imagFile.name;
-      const storageRef=ref(storage,fileName);
-      const uploadTask=uploadBytesResumable(storageRef,imagFile);
+      const fileName = new Date().getTime() + imagFile.name;
+      const storageRef = ref(storage, fileName);
+      const uploadTask = uploadBytesResumable(storageRef, imagFile);
 
       uploadTask.on(
         'state_changed',
         (snapshot) => {
           const progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            //toFixed means no decimal
-            setImageFileUploadProgress(progress.toFixed(0));
+          //toFixed means no decimal
+          setImageFileUploadProgress(progress.toFixed(0));
 
         },
-        (error)=>{
+        (error) => {
           setImageFileUploadError(error);
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            
+
             setImageFileURL(downloadURL);
-            setFormData({...formData, profilePicture:downloadURL});
+            setFormData({ ...formData, profilePicture: downloadURL });
           });
         }
       )
 
-      
+
     }
-    if(imagFile) uploadImage();
+    if (imagFile) uploadImage();
 
   }, [imagFile])
 
+  const handleDeleteUser = async () => {
+    setShowModal(false);
+
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: 'DELETE',
+      })
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        dispatch(deleteUserFailure(data.message));
+      }
+      else {
+        dispatch(deleteUserSuccess(data));
+      }
+
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message));
+    }
+  }
+
   return (
-    <div className='w-[70%] p-5 mx-auto'>
+    <>
+      <div className='w-[70%] p-5 mx-auto relative'>
 
-      <h1 className='text-3xl font-semibold text-center'>Profile</h1>
+        <h1 className='text-3xl font-semibold text-center'>Profile</h1>
 
-      <form onSubmit={handleSubmit} className='mt-10 flex flex-col gap-4'>
-       
-        <input type="file" accept='image/*'
-          onChange={handleImageChange}
-          ref={filePickRef}
-          hidden 
-        />
+        <form onSubmit={handleSubmit} className='mt-10 flex flex-col gap-4'>
 
-        <div className='w-32 h-32 rounded-full mx-auto'>
+          <input type="file" accept='image/*'
+            onChange={handleImageChange}
+            ref={filePickRef}
+            hidden
+          />
 
-          <img alt="https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG.png"
-            src={ imageFileURL || currentUser.profilePicture  } className='rounded-full w-full h-full border-8 
+          <div className='w-32 h-32 rounded-full mx-auto'>
+
+            <img alt="https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG.png"
+              src={imageFileURL || currentUser.profilePicture} className='rounded-full w-full h-full border-8 
           shadow-md  cursor-pointer'
-            onClick={() => filePickRef.current.click()}
-           />
+              onClick={() => filePickRef.current.click()}
+            />
 
-        </div>
+          </div>
 
-        {imageFileUploadError && <Alert color='failure'>{imageFileUploadError}</Alert>}
+          {imageFileUploadError && <Alert color='failure'>{imageFileUploadError}</Alert>}
 
-        <TextInput id='username' type='text' placeholder={currentUser.username} onChange={handleChange} ></TextInput>
-        <TextInput id='email' type='text' placeholder={currentUser.email}  onChange={handleChange}></TextInput>
-        <TextInput id='password' type='password' placeholder='password'  onChange={handleChange}></TextInput>
-        <Button type='submit' gradientDuoTone='purpleToPink'>Update</Button>
+          <TextInput id='username' type='text' placeholder={currentUser.username} onChange={handleChange} ></TextInput>
+          <TextInput id='email' type='text' placeholder={currentUser.email} onChange={handleChange}></TextInput>
+          <TextInput id='password' type='password' placeholder='password' onChange={handleChange}></TextInput>
+          <Button type='submit' gradientDuoTone='purpleToPink'>Update</Button>
 
-        <div className='flex justify-between flex-nowrap'>
-          <span className='text-sm text-red-600 font-semibold cursor-pointer'>Delete Account</span>
-          <span className='text-sm text-red-600 font-semibold cursor-pointer'>Sign Out</span>
+          <div className='flex justify-between flex-nowrap'>
+            <span className='text-sm text-red-600 font-semibold cursor-pointer'
+              onClick={() => setShowModal(true)}>Delete Account</span>
+            <span className='text-sm text-red-600 font-semibold cursor-pointer'>Sign Out</span>
 
-        </div>
-      </form>
+          </div>
 
-    </div>
+          {updateUserSuccess && (
+            <Alert color='success' className='mt-5'>{updateUserSuccess}</Alert>
+          )}
+
+
+          {updateUserError && (
+            <Alert color='failure' className='mt-5'>{updateUserError}</Alert>
+          )}
+
+          {
+            error && (
+              <Alert color='failure' className='mt-5'>
+                {error}
+              </Alert>
+            )
+          }
+
+
+          <Modal
+            show={showModal}
+            onClose={() => setShowModal(false)}
+            popup
+            size='md'
+          >
+            <Modal.Header />
+            <Modal.Body>
+              <div className='text-center'>
+                <FaTriangleExclamation className='h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto' />
+                <h3 className='mb-5 text-lg text-gray-500 dark:text-gray-400'>
+                  Are you sure you want to delete your account?
+                </h3>
+                <div className='flex justify-center gap-4'>
+                  <Button color='failure' onClick={handleDeleteUser}>
+                    Yes, I'm sure
+                  </Button>
+                  <Button color='gray' onClick={() => setShowModal(false)}>
+                    No, cancel
+                  </Button>
+                </div>
+              </div>
+            </Modal.Body>
+          </Modal>
+        </form>
+      </div>
+
+
+    </>
   )
 }
