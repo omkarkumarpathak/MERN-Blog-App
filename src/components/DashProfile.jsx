@@ -13,7 +13,8 @@ import { app } from '../../firebase.js';
 
 import {
   updateStart, updateFailure, updateSuccess,
-  deleteUserFailure, deleteUserStart, deleteUserSuccess
+  deleteUserFailure, deleteUserStart, deleteUserSuccess,
+  signOutSuccess
 } from '../redux/user/userSlice.js';
 import { useDispatch } from 'react-redux';
 
@@ -155,6 +156,27 @@ export default function DashProfile() {
     }
   }
 
+  const handleSignOut=async()=>{
+    try {
+    
+      const res=await fetch('/api/user/signout',{
+        method:'POST',
+      });
+
+      const data= await res.json();
+      if(!res.ok){
+        console.log(data.message);
+      }
+      else{
+        dispatch(signOutSuccess());
+      }
+
+    } catch (error) {
+      console.log(error.message);
+    }
+
+  };
+  
   return (
     <>
       <div className='w-[70%] p-5 mx-auto relative'>
@@ -189,7 +211,9 @@ export default function DashProfile() {
           <div className='flex justify-between flex-nowrap'>
             <span className='text-sm text-red-600 font-semibold cursor-pointer'
               onClick={() => setShowModal(true)}>Delete Account</span>
-            <span className='text-sm text-red-600 font-semibold cursor-pointer'>Sign Out</span>
+            
+            <span className='text-sm text-red-600 font-semibold cursor-pointer'
+            onClick={handleSignOut}>Sign Out</span>
 
           </div>
 
