@@ -8,6 +8,9 @@ import Projects from "./pages/Projects"
 import FooterB from "./components/FooterB"
 import PrivateRoute from "./components/PrivateRoute"
 import Dashboard from './pages/Dashboard';
+import CreatePost from "./pages/CreatePost"
+import IsAdminRoute from './components/IsAdminRoute';
+
 function App() {
 
   return (
@@ -20,6 +23,11 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />}></Route>
         </Route>
+
+        <Route element={<IsAdminRoute />}>
+          <Route path="/create-post" element={<CreatePost />}></Route>
+        </Route>
+
         <Route path="/sign-up" element={<SignUp />}></Route>
         <Route path="/projects" element={<Projects />}></Route>
       </Routes>

@@ -17,6 +17,7 @@ import {
   signOutSuccess
 } from '../redux/user/userSlice.js';
 import { useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 export default function DashProfile() {
 
@@ -156,18 +157,18 @@ export default function DashProfile() {
     }
   }
 
-  const handleSignOut=async()=>{
+  const handleSignOut = async () => {
     try {
-    
-      const res=await fetch('/api/user/signout',{
-        method:'POST',
+
+      const res = await fetch('/api/user/signout', {
+        method: 'POST',
       });
 
-      const data= await res.json();
-      if(!res.ok){
+      const data = await res.json();
+      if (!res.ok) {
         console.log(data.message);
       }
-      else{
+      else {
         dispatch(signOutSuccess());
       }
 
@@ -176,7 +177,7 @@ export default function DashProfile() {
     }
 
   };
-  
+
   return (
     <>
       <div className='w-[70%] p-5 mx-auto relative'>
@@ -208,58 +209,71 @@ export default function DashProfile() {
           <TextInput id='password' type='password' placeholder='password' onChange={handleChange}></TextInput>
           <Button type='submit' gradientDuoTone='purpleToPink'>Update</Button>
 
-          <div className='flex justify-between flex-nowrap'>
-            <span className='text-sm text-red-600 font-semibold cursor-pointer'
-              onClick={() => setShowModal(true)}>Delete Account</span>
-            
-            <span className='text-sm text-red-600 font-semibold cursor-pointer'
-            onClick={handleSignOut}>Sign Out</span>
-
-          </div>
-
-          {updateUserSuccess && (
-            <Alert color='success' className='mt-5'>{updateUserSuccess}</Alert>
-          )}
-
-
-          {updateUserError && (
-            <Alert color='failure' className='mt-5'>{updateUserError}</Alert>
-          )}
-
           {
-            error && (
-              <Alert color='failure' className='mt-5'>
-                {error}
-              </Alert>
+            currentUser.isAdmin && (
+              <Link to="/create-post">
+                <Button type='button' gradientDuoTone='purpleToBlue'
+                className='w-full'>
+                  Create Post
+                </Button>
+              </Link>
             )
           }
 
 
-          <Modal
-            show={showModal}
-            onClose={() => setShowModal(false)}
-            popup
-            size='md'
-          >
-            <Modal.Header />
-            <Modal.Body>
-              <div className='text-center'>
-                <FaTriangleExclamation className='h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto' />
-                <h3 className='mb-5 text-lg text-gray-500 dark:text-gray-400'>
-                  Are you sure you want to delete your account?
-                </h3>
-                <div className='flex justify-center gap-4'>
-                  <Button color='failure' onClick={handleDeleteUser}>
-                    Yes, I'm sure
-                  </Button>
-                  <Button color='gray' onClick={() => setShowModal(false)}>
-                    No, cancel
-                  </Button>
-                </div>
-              </div>
-            </Modal.Body>
-          </Modal>
         </form>
+        <div className='flex justify-between flex-nowrap mt-3'>
+          <span className='text-sm text-red-600 font-semibold cursor-pointer'
+            onClick={() => setShowModal(true)}>Delete Account</span>
+
+          <span className='text-sm text-red-600 font-semibold cursor-pointer'
+            onClick={handleSignOut}>Sign Out</span>
+
+        </div>
+
+        {updateUserSuccess && (
+          <Alert color='success' className='mt-5'>{updateUserSuccess}</Alert>
+        )}
+
+
+        {updateUserError && (
+          <Alert color='failure' className='mt-5'>{updateUserError}</Alert>
+        )}
+
+        {
+          error && (
+            <Alert color='failure' className='mt-5'>
+              {error}
+            </Alert>
+          )
+        }
+
+
+        <Modal
+          show={showModal}
+          onClose={() => setShowModal(false)}
+          popup
+          size='md'
+        >
+          <Modal.Header />
+          <Modal.Body>
+            <div className='text-center'>
+              <FaTriangleExclamation className='h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto' />
+              <h3 className='mb-5 text-lg text-gray-500 dark:text-gray-400'>
+                Are you sure you want to delete your account?
+              </h3>
+              <div className='flex justify-center gap-4'>
+                <Button color='failure' onClick={handleDeleteUser}>
+                  Yes, I'm sure
+                </Button>
+                <Button color='gray' onClick={() => setShowModal(false)}>
+                  No, cancel
+                </Button>
+              </div>
+            </div>
+          </Modal.Body>
+        </Modal>
+
       </div>
 
 
