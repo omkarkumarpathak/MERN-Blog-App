@@ -4,12 +4,15 @@ import {HiUser} from 'react-icons/hi'
 import { FaArrowRight } from "react-icons/fa";
 import { Link, useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { signOutSuccess } from '../redux/user/userSlice';
 
 export default function DashSidebar() {
 
     const [tab, setTab] = useState('');
     const location = useLocation();
     const navigate=useNavigate();
+    const dispatch=useDispatch();
 
     useEffect(() => {
       const urlParams = new URLSearchParams(location.search);
@@ -18,6 +21,27 @@ export default function DashSidebar() {
         setTab(tabFromUrl);
       }
     }, [location.search]);
+
+    const handleSignOut = async () => {
+      try {
+  
+        const res = await fetch('/api/user/signout', {
+          method: 'POST',
+        });
+  
+        const data = await res.json();
+        if (!res.ok) {
+          console.log(data.message);
+        }
+        else {
+          dispatch(signOutSuccess());
+        }
+  
+      } catch (error) {
+        console.log(error.message);
+      }
+
+    };
 
   return (
     <Sidebar className='w-full'>
@@ -31,8 +55,8 @@ export default function DashSidebar() {
                     Profile
                 </Sidebar.Item>
 
-                <Sidebar.Item icon={FaArrowRight} >
-                    Sign Out
+                <Sidebar.Item icon={FaArrowRight}>
+                    <p onClick={handleSignOut}>Sign Out</p>
                 </Sidebar.Item>
 
             </Sidebar.ItemGroup>
