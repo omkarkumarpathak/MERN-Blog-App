@@ -6,6 +6,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { signOutSuccess } from '../redux/user/userSlice';
+import { IoDocumentTextOutline } from "react-icons/io5";
 
 export default function DashSidebar() {
 
@@ -49,13 +50,19 @@ export default function DashSidebar() {
             <Sidebar.ItemGroup className='cursor-pointer'>
 
                 <Sidebar.Item icon={HiUser} label={'user'}
-                     active={tab==='profile'}
+                     active={tab==='profile'} //for making ui dark of this button
                      onClick={()=>navigate('/dashboard?tab=profile')}>
                     
                     Profile
                 </Sidebar.Item>
+                
+                <Sidebar.Item icon={IoDocumentTextOutline}
+                active={tab=='posts'}
+                onClick={()=>navigate('/dashboard?tab=posts')}>
+                    <p >Posts</p>
+                </Sidebar.Item>
 
-                <Sidebar.Item icon={FaArrowRight}>
+                <Sidebar.Item icon={FaArrowRight} >
                     <p onClick={handleSignOut}>Sign Out</p>
                 </Sidebar.Item>
 
