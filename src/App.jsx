@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import CreatePost from "./pages/CreatePost"
 import IsAdminRoute from './components/IsAdminRoute';
 import UpdatePost from "./pages/UpdatePost"
+import PostPage from "./pages/PostPage"
 
 function App() {
 
@@ -30,6 +31,7 @@ function App() {
         </Route>
 
         <Route path="/update-post/:postId" element={<UpdatePost />}></Route>
+        <Route path="/post/:postId/:PostSlug" element={<PostPage />}></Route>
 
         <Route path="/sign-up" element={<SignUp />}></Route>
         <Route path="/projects" element={<Projects />}></Route>

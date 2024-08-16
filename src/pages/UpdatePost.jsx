@@ -105,7 +105,7 @@ export default function UpdatePost() {
 
             if (res.ok) {
                 setPublishError(null);
-                navigate(`/`);
+                navigate(`/showPost/${postId}`);
             }
             if (!res.ok) {
                 setPublishError(data.message);
